@@ -11,6 +11,11 @@ output/
 *.mp3
 *.wav
 
+# User-provided music (you must own / have license to these)
+assets/music/*
+!assets/music/.gitkeep
+!assets/music/README.md
+
 # Python
 __pycache__/
 *.py[cod]
@@ -19,6 +24,9 @@ __pycache__/
 venv/
 *.egg-info/
 .pytest_cache/
+
+# Whisper model cache
+.cache/
 
 # OS
 .DS_Store
