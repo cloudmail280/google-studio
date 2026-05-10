@@ -7,7 +7,10 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from .config import config
 
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube",  # needed for thumbnails.set
+]
 
 
 def upload(
@@ -17,6 +20,7 @@ def upload(
     tags: list[str],
     privacy: str | None = None,
     made_with_ai: bool = True,
+    thumbnail_path: Path | None = None,
 ) -> str:
     """Upload & return the YouTube video ID."""
     youtube = _auth()
@@ -26,12 +30,11 @@ def upload(
             "title": title[:100],
             "description": description,
             "tags": tags,
-            "categoryId": "22",  # People & Blogs (ubah sesuai konten)
+            "categoryId": "22",
         },
         "status": {
             "privacyStatus": privacy or config.default_privacy,
             "selfDeclaredMadeForKids": False,
-            # AI disclosure flag — penting kalau konten mengandung altered/synthetic media
             "containsSyntheticMedia": made_with_ai,
         },
     }
@@ -47,6 +50,18 @@ def upload(
 
     video_id = response["id"]
     print(f"  uploaded → https://youtu.be/{video_id} (privacy: {body['status']['privacyStatus']})")
+
+    # Set custom thumbnail (requires verified channel)
+    if thumbnail_path and Path(thumbnail_path).exists():
+        try:
+            youtube.thumbnails().set(
+                videoId=video_id,
+                media_body=MediaFileUpload(str(thumbnail_path), mimetype="image/jpeg"),
+            ).execute()
+            print("  thumbnail uploaded")
+        except Exception as e:
+            print(f"  [warn] thumbnail upload failed (channel must be verified): {e}")
+
     return video_id
 
 

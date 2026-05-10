@@ -1,0 +1,71 @@
+name: Auto-post YouTube Short
+
+# Schedule: daily 09:00 Asia/Jakarta (UTC+7) = 02:00 UTC
+# Also runs manually via the "Run workflow" button.
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      topic:
+        description: "Topic hint (leave empty for AI to pick)"
+        required: false
+        default: ""
+      privacy:
+        description: "YouTube privacy status"
+        required: false
+        default: "unlisted"
+        type: choice
+        options: [private, unlisted, public]
+      no_upload:
+        description: "Dry run (generate only, do not upload)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  generate-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Write secrets to files
+        env:
+          CLIENT_SECRET_JSON: ${{ secrets.YT_CLIENT_SECRET_JSON }}
+          TOKEN_PICKLE_B64: ${{ secrets.YT_TOKEN_PICKLE_B64 }}
+        run: |
+          printf '%s' "$CLIENT_SECRET_JSON" > client_secret.json
+          printf '%s' "$TOKEN_PICKLE_B64" | base64 -d > token.json
+
+      - name: Run pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          DEFAULT_PRIVACY: ${{ inputs.privacy || 'unlisted' }}
+        run: |
+          args=()
+          if [ -n "${{ inputs.topic }}" ]; then args+=(--topic "${{ inputs.topic }}"); fi
+          if [ "${{ inputs.no_upload }}" = "true" ]; then args+=(--no-upload); fi
+          python main.py "${args[@]}"
+
+      - name: Upload generated artifacts (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-output
+          path: output/
+          retention-days: 7
