@@ -4,7 +4,7 @@ from moviepy.editor import (
     AudioFileClip,
     VideoFileClip,
     concatenate_videoclips,
-    CompositeVideoClip,
+    vfx,
 )
 from .config import config
 
@@ -26,9 +26,9 @@ def build_video(clip_paths: list[Path], audio_path: Path, out_path: Path) -> Pat
         segments.append(v)
 
     video = concatenate_videoclips(segments, method="compose")
-    # If concatenation is shorter than audio (clips were short), loop the last bit
+    # If concatenation is shorter than audio (clips were short), loop to match
     if video.duration < total:
-        video = video.fx(lambda c: c.loop(duration=total))
+        video = video.fx(vfx.loop, duration=total)
     video = video.subclip(0, total).set_audio(audio)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
