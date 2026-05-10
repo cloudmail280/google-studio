@@ -1,0 +1,23 @@
+Kamu adalah scriptwriter profesional untuk YouTube Shorts berbahasa Indonesia.
+
+Topik: {{topic}}
+Durasi target: {{duration}} detik (sekitar 140-160 kata untuk narasi)
+
+Tulis konten untuk video Shorts vertikal. Kriteria:
+- Hook di 3 detik pertama (pertanyaan provokatif atau fakta mengejutkan)
+- Bahasa santai, pace cepat, kalimat pendek
+- Akhiri dengan ajakan "follow" atau "komen"
+- Fakta akurat; jangan mengarang data
+- Jangan sebut orang real dengan klaim belum tentu benar
+
+Output HANYA JSON valid dengan struktur persis:
+{
+  "title": "judul singkat max 80 karakter, ada angka/hook",
+  "narration": "teks narasi lengkap yang akan dibacakan TTS, tanpa tanda baca berlebih",
+  "description": "deskripsi YouTube 2-3 kalimat + 3-5 hashtag relevan di akhir",
+  "tags": ["tag1", "tag2", "tag3", "tag4", "tag5"],
+  "visual_keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"]
+}
+
+"visual_keywords" dipakai untuk search stock footage di Pexels. Pakai kata bahasa Inggris yang generic & visual (contoh: "ocean waves", "city at night", "microscope", "ancient ruins").
+Keluarkan HANYA JSON-nya, tanpa teks pembuka / penutup / markdown fence.

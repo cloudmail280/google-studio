@@ -1,0 +1,29 @@
+# Secrets
+.env
+client_secret.json
+token.json
+*.credentials
+*.oauth
+
+# Output
+output/
+*.mp4
+*.mp3
+*.wav
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
